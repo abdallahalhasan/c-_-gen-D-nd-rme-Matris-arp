@@ -1,0 +1,178 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Windows.Forms; 
+using Tao.OpenGl;
+namespace WindowsFormsApp1
+{
+
+  
+    public partial class Form1 : Form
+    {
+
+        public static double[,] Matrescarp(double[,] A, double[,] B)
+        {
+            double[,] sounc = new double[A.GetLength(0), B.GetLength(1)];
+            for (int i = 0; i < A.GetLength(0); i++)
+            {
+                for (int j = 0; j < B.GetLength(1); j++)
+                {
+                    for (int k = 0; k < B.GetLength(0); k++)
+                    {
+                        sounc[i, j] += A[i, k] * B[k, j];
+                    }
+
+                }
+            }
+            return sounc;
+        }
+
+        public static double[,] saat_yon(bool yon) {
+
+             if(yon == true){
+
+                double[,] birim = { { 0.17, -0.98, 0 }, { 0.98, 0.17, 0 }, { 0, 0, 1 } };
+                return birim;
+            }else
+            {
+                double[,] birim = { { 0.17, 0.98, 0 }, { -0.98, 0.17, 0 }, { 0, 0, 1 } };
+                return birim;
+            }
+
+            
+        }
+
+        public static double[,] Dondurme(double[,] A , double[,] birim)
+        {
+
+           
+            double[,] sounc = new double[A.GetLength(0), A.GetLength(1)];
+            double[,] sounc1 = new double[A.GetLength(0), A.GetLength(1)];
+            double[,] gecici_sounc = new double[A.GetLength(0), A.GetLength(1)];
+
+            double[,] otele = { { 1, 0, 0 }, { 0, 1, 0 }, { -5, -5, 1 } };
+            double[,] otele_geri_al = { { 1, 0, 0 }, { 0, 1, 0 }, { 5, 5, 1 } };
+
+            gecici_sounc = Matrescarp(A, otele);//a matrisi ve otele matrisi carp 
+            sounc = Matrescarp(gecici_sounc, birim); //sonra birim matris ile carp 
+            sounc1 = Matrescarp(sounc, otele_geri_al);// sonra otele geri al ile carp 
+    
+
+            return sounc1;
+        }
+
+
+        public Form1()
+        {
+            InitializeComponent();
+            opGl.InitializeContexts();
+            Gl.glClearColor(0f, 0f, 0f,0f);
+    
+        }
+
+        private void simpleOpenGlControl1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void myPaint(object sender, PaintEventArgs e)
+        {
+
+
+            double[,] Totele = { {5,1,1 }, {8,1,1 }, {5,3,1 } };//ilk cisim 
+            double[,] birim = { { 1, 0, 0 }, { 0, 1, 0 }, { -4, 0, 1 } };
+            double[,] otele = Matrescarp(Totele, birim);
+            Gl.glClear(Gl.GL_COLOR_BUFFER_BIT);
+            Gl.glColor3f(0, 0, 1);
+            double [,] dondurme = Dondurme(otele,saat_yon(true));
+
+
+
+            // ilk çizgi 
+            Gl.glLineWidth(3);
+            Gl.glBegin(Gl.GL_LINES);
+            Gl.glVertex2f(0f, 2f);
+            Gl.glVertex2f(0f, -2f);
+            Gl.glEnd();
+
+            // ikinci çizgi 
+            Gl.glLineWidth(3);
+            Gl.glBegin(Gl.GL_LINES);
+            Gl.glVertex2f(2f, 0f);
+            Gl.glVertex2f(-2f, 0f);
+            Gl.glEnd();
+
+            // p(5,5) noktası 
+            Gl.glColor3f(1, 0, 0);
+            Gl.glEnable(Gl.GL_POINT_SMOOTH);
+            Gl.glPointSize(7);
+            Gl.glBegin(Gl.GL_POINTS);
+            Gl.glVertex2f(0.5f, 0.5f);
+            Gl.glEnd();
+
+            // cismin ilk hali 
+            Gl.glColor3f(2, 2, 2);
+            Gl.glBegin(Gl.GL_LINE_LOOP);
+            Gl.glVertex2f(0.5f, 0.1f);
+            Gl.glVertex2f(0.8f, 0.1f);
+            Gl.glVertex2f(0.5f, 0.3f);
+            Gl.glEnd();
+
+
+            // cisimin ilk hali noktaları 
+            Gl.glColor3f(1, 0, 0);
+            Gl.glEnable(Gl.GL_POINT_SMOOTH);
+            Gl.glPointSize(5);
+            Gl.glBegin(Gl.GL_POINTS);
+            Gl.glVertex2f(0.5f, 0.1f);
+            Gl.glVertex2f(0.8f, 0.1f);
+            Gl.glVertex2f(0.5f, 0.3f);
+            Gl.glVertex2f(0.0f, 0.0f);
+            Gl.glEnd();
+
+
+            // cisimin ötelenmiş hali 
+            Gl.glColor3f(1, 0, 0);
+            Gl.glBegin(Gl.GL_LINE_LOOP);
+            Gl.glVertex2f((float)otele[0, 0] / 10  , (float)otele[0, 1]/ 10 );
+            Gl.glVertex2f((float)otele[1, 0] / 10 , (float)otele[1, 1] / 10);
+            Gl.glVertex2f((float)otele[2, 0] / 10 , (float)otele[2, 1] / 10 );
+            Gl.glEnd();
+
+            // cisimin ötelenmiş hali noktalrı 
+            Gl.glColor3f(0, 1, 2);
+            Gl.glEnable(Gl.GL_POINT_SMOOTH);
+            Gl.glPointSize(5);
+            Gl.glBegin(Gl.GL_POINTS);
+            Gl.glVertex2f((float)otele[0, 0] / 10, (float)otele[0, 1] / 10);
+            Gl.glVertex2f((float)otele[1, 0] / 10, (float)otele[1, 1] / 10);
+            Gl.glVertex2f((float)otele[2, 0] / 10, (float)otele[2, 1] / 10);
+            Gl.glEnd();
+
+
+            // cismin nokta etrafina döndürlemiş hali 
+            Gl.glColor3f(0, 0, 2);
+            Gl.glBegin(Gl.GL_LINE_LOOP);
+            Gl.glVertex2f((float)dondurme[0, 0] / 10, (float)dondurme[0, 1] / 10);
+            Gl.glVertex2f((float)dondurme[1, 0] / 10, (float)dondurme[1, 1] / 10);
+            Gl.glVertex2f((float)dondurme[2, 0] / 10, (float)dondurme[2, 1] / 10);
+            Gl.glEnd();
+
+
+            // cismin nokta etrafina döndürlemiş noktaları 
+            Gl.glColor3f(0, 1, 2);
+            Gl.glEnable(Gl.GL_POINT_SMOOTH);
+            Gl.glPointSize(5);
+            Gl.glBegin(Gl.GL_POINTS);
+            Gl.glVertex2f((float)dondurme[0, 0] / 10, (float)dondurme[0, 1] / 10);
+            Gl.glVertex2f((float)dondurme[1, 0] / 10, (float)dondurme[1, 1] / 10);
+            Gl.glVertex2f((float)dondurme[2, 0] / 10, (float)dondurme[2, 1] / 10);
+            Gl.glEnd();
+
+        }
+    }
+}
